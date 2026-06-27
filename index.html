@@ -696,7 +696,7 @@
       <div id="avvisoPausa"></div>
     </section>
 
-    <details class="card collapsible-card">
+    <details id="uscitaEffettivaCard" class="card collapsible-card">
       <summary>
         <div class="section-title">uscita effettiva</div>
       </summary>
@@ -741,11 +741,18 @@
       "oraEntrata",
       "fineFascia",
       "uscitaPausa",
-      "rientroPausa",
-      "uscitaEffettiva"
+      "rientroPausa"
     ];
 
     ids.forEach(id => document.getElementById(id).addEventListener("input", calcola));
+
+    function allineaUscitaEffettivaAlMinimo() {
+      calcola();
+      uscitaEffettiva.value = oraUscita.textContent;
+      calcola();
+    }
+
+    uscitaEffettiva.addEventListener("input", calcola);
 
     let ultimoInizioFascia = minutiDaOra(inizioFascia.value);
 
@@ -759,9 +766,20 @@
       fineFascia.value = oraDaMinuti(inizio + 60);
       ultimoInizioFascia = inizio;
 
-      calcola();
-      uscitaEffettiva.value = oraUscita.textContent;
-      calcola();
+      allineaUscitaEffettivaAlMinimo();
+    });
+
+    oraEntrata.addEventListener("input", () => {
+      allineaUscitaEffettivaAlMinimo();
+    });
+
+    uscitaPausa.addEventListener("input", () => {
+      allineaUscitaEffettivaAlMinimo();
+    });
+
+    rientroPausa.addEventListener("input", () => {
+      finePausaSelezionata = true;
+      allineaUscitaEffettivaAlMinimo();
     });
 
     let finePausaSelezionata = false;
@@ -865,12 +883,6 @@
       }
 
       let uscitaEff = minutiDaOra(uscitaEffettiva.value);
-      uscitaEffettiva.min = oraDaMinuti(finePausa);
-
-      if (uscitaEff < finePausa) {
-        uscitaEffettiva.value = oraDaMinuti(finePausa);
-        uscitaEff = finePausa;
-      }
 
       const minutiLavorati = Math.max(0, uscitaEff - entrataEffettiva - durataPausa);
       const differenzaPresenza = minutiLavorati - MINUTI_LAVORO;
@@ -1004,9 +1016,19 @@
 
       finePausaSelezionata = false;
 
+      const uscitaEffettivaCard = document.getElementById("uscitaEffettivaCard");
+      if (uscitaEffettivaCard) {
+        uscitaEffettivaCard.removeAttribute("open");
+      }
+
       calcola();
       animaRisultato();
     });
+
+    const uscitaEffettivaCard = document.getElementById("uscitaEffettivaCard");
+    if (uscitaEffettivaCard) {
+      uscitaEffettivaCard.removeAttribute("open");
+    }
 
     calcola();
   </script>

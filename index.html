@@ -720,8 +720,8 @@
       <button id="resetButton" class="reset-button" type="button">Reset</button>
     </section>
 
-    <div class="footer-credit" aria-label="Designed by Alessandro Mandelli">
-      <span>Designed by</span>
+    <div class="footer-credit" aria-label="Powered by Alessandro Mandelli">
+      <span>Powered by</span>
       <span>Alessandro Mandelli</span>
     </div>
   </main>
@@ -963,6 +963,7 @@
       }
 
       aggiornaStatoAnomalie(anomalie);
+      salvaOrari();
     }
 
 
@@ -1005,6 +1006,37 @@
       uscitaEffettiva: "16:12"
     };
 
+    const CHIAVE_SALVATAGGIO = "timbraturaPolitecnico.";
+    let salvataggioAttivo = true;
+
+    function salvaOrari() {
+      if (!salvataggioAttivo) return;
+
+      Object.keys(valoriIniziali).forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+          localStorage.setItem(CHIAVE_SALVATAGGIO + id, input.value);
+        }
+      });
+    }
+
+    function caricaOrariSalvati() {
+      Object.keys(valoriIniziali).forEach(id => {
+        const valoreSalvato = localStorage.getItem(CHIAVE_SALVATAGGIO + id);
+        const input = document.getElementById(id);
+
+        if (input && valoreSalvato !== null) {
+          input.value = valoreSalvato;
+        }
+      });
+    }
+
+    function cancellaOrariSalvati() {
+      Object.keys(valoriIniziali).forEach(id => {
+        localStorage.removeItem(CHIAVE_SALVATAGGIO + id);
+      });
+    }
+
     document.getElementById("statusPanel").addEventListener("click", event => {
       const toggle = event.target.closest("#statusToggle");
       if (!toggle) return;
@@ -1039,6 +1071,9 @@
     });
 
     resetButton.addEventListener("click", () => {
+      cancellaOrariSalvati();
+      salvataggioAttivo = false;
+
       Object.entries(valoriIniziali).forEach(([id, valore]) => {
         document.getElementById(id).value = valore;
       });
@@ -1058,6 +1093,7 @@
 
       calcola();
       animaRisultato();
+      salvataggioAttivo = true;
     });
 
     const uscitaEffettivaCard = document.getElementById("uscitaEffettivaCard");
@@ -1065,6 +1101,9 @@
       uscitaEffettivaCard.removeAttribute("open");
     }
 
+    caricaOrariSalvati();
+    ultimoInizioFascia = minutiDaOra(inizioFascia.value);
+    ultimoInizioPausa = minutiDaOra(uscitaPausa.value);
     calcola();
   </script>
 </body>
